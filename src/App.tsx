@@ -79,6 +79,33 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const imageItem = Array.from(event.clipboardData?.items ?? []).find((item) =>
+        item.type.startsWith('image/'),
+      );
+
+      if (!imageItem) {
+        return;
+      }
+
+      const file = imageItem.getAsFile();
+      if (!file) {
+        setCameraError('The pasted image could not be read.');
+        return;
+      }
+
+      event.preventDefault();
+      void loadImageSource(file, 'pasted-image');
+    };
+
+    window.addEventListener('paste', handlePaste);
+
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
+  useEffect(() => {
     if (captureCountdown === null) {
       clearCaptureCountdown(captureCountdownTimeoutRef);
       return;
@@ -214,6 +241,38 @@ function App() {
     drawMeme(canvas, 'png');
   }, [image, topText, bottomText, previewHeight, zoom, offsetX, offsetY, textScale, strokeScale]);
 
+  const loadImageSource = async (file: Blob, fallbackName: string) => {
+    try {
+      const objectUrl = URL.createObjectURL(file);
+      const nextImage = await loadImage(objectUrl);
+
+      setImage((current) => {
+        if (current) {
+          URL.revokeObjectURL(current.url);
+        }
+
+        return {
+          element: nextImage,
+          url: objectUrl,
+          width: nextImage.naturalWidth,
+          height: nextImage.naturalHeight,
+        };
+      });
+
+      if (isCameraOpen) {
+        handleCloseCamera();
+      }
+
+      setCameraError('');
+      setZoom(1);
+      setOffsetX(0.5);
+      setOffsetY(0.5);
+      setDownloadName(stripExtension(file instanceof File ? file.name : fallbackName) || 'lolcat');
+    } catch {
+      setCameraError('The image could not be loaded.');
+    }
+  };
+
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     setCameraError('');
     const file = event.target.files?.[0];
@@ -221,25 +280,7 @@ function App() {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    const nextImage = await loadImage(objectUrl);
-
-    setImage((current) => {
-      if (current) {
-        URL.revokeObjectURL(current.url);
-      }
-
-      return {
-        element: nextImage,
-        url: objectUrl,
-        width: nextImage.naturalWidth,
-        height: nextImage.naturalHeight,
-      };
-    });
-    setZoom(1);
-    setOffsetX(0.5);
-    setOffsetY(0.5);
-    setDownloadName(stripExtension(file.name) || 'lolcat');
+    await loadImageSource(file, file.name);
   };
 
   const handleStartCamera = async () => {
@@ -311,26 +352,7 @@ function App() {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(blob);
-    const nextImage = await loadImage(objectUrl);
-
-    setImage((current) => {
-      if (current) {
-        URL.revokeObjectURL(current.url);
-      }
-
-      return {
-        element: nextImage,
-        url: objectUrl,
-        width: nextImage.naturalWidth,
-        height: nextImage.naturalHeight,
-      };
-    });
-    setZoom(1);
-    setOffsetX(0.5);
-    setOffsetY(0.5);
-    setDownloadName('meem-makr-camera-shot');
-    handleCloseCamera();
+    await loadImageSource(blob, 'meem-makr-camera-shot');
   };
 
   const handleCaptureFromCamera = () => {
@@ -444,6 +466,7 @@ function App() {
             accept="image/*"
             onChange={handleUpload}
           />
+          <p className="source-hint">or paste an image with Cmd+V / Ctrl+V</p>
         </div>
       </section>
 
@@ -497,7 +520,7 @@ function App() {
               ? 'Position your webcam shot, then capture it to turn it into the meme source image.'
               : image
               ? 'Drag the image to reposition the crop. Use zoom for a tighter frame.'
-              : 'Upload an image to start editing.'}
+              : 'Upload, paste, or capture an image to start editing.'}
           </p>
           {cameraError ? <p className="camera-error">{cameraError}</p> : null}
         </div>
