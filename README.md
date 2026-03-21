@@ -1,10 +1,11 @@
 # meem makr
 
-`meem makr` is a client-side React + TypeScript web app for creating lolcat-style meme images. It lets you upload a local image, crop and resize it in the browser, add classic top and bottom meme captions, and export the result as a PNG or JPG.
+`meem makr` is a client-side React + TypeScript web app for creating lolcat-style meme images. It lets you upload a local image or capture one from your webcam, crop and resize it in the browser, add classic top and bottom meme captions, and export the result as a PNG or JPG.
 
 ## Features
 
 - Local image upload with no server-side components
+- Webcam capture with an in-preview 3-2-1 countdown
 - Drag-to-reposition crop with zoom control
 - Top and bottom caption fields
 - Impact-style meme text rendering with white fill and black outline
@@ -36,6 +37,12 @@ Then open the local URL shown by Vite, typically:
 http://127.0.0.1:5173/
 ```
 
+## Using the App
+
+- Upload an image from your device, or open the webcam and capture a frame after the countdown.
+- Drag the image preview to reposition the crop and use the zoom slider for framing.
+- Enter top and bottom caption text, then export the result as PNG or JPG.
+
 ## Production Build
 
 Create a production build:
@@ -53,4 +60,5 @@ npm run preview
 ## Notes
 
 - The app runs entirely in the browser and does not upload images to a server.
+- Webcam capture requires browser camera permission.
 - Exact Impact rendering depends on whether the font is available on the local system. The app falls back to similar heavy sans-serif fonts when needed.

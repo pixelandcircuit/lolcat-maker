@@ -19,6 +19,9 @@ const PREVIEW_WIDTH = 960;
 function App() {
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const captureCountdownTimeoutRef = useRef<number | null>(null);
   const dragStateRef = useRef<{
     startX: number;
     startY: number;
@@ -36,6 +39,10 @@ function App() {
   const [strokeScale, setStrokeScale] = useState(1);
   const [quality, setQuality] = useState(0.92);
   const [downloadName, setDownloadName] = useState('lolcat');
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
+  const [captureCountdown, setCaptureCountdown] = useState<number | null>(null);
+  const [cameraError, setCameraError] = useState('');
 
   useEffect(() => {
     return () => {
@@ -44,6 +51,53 @@ function App() {
       }
     };
   }, [image]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (isCameraOpen && cameraStreamRef.current) {
+      video.srcObject = cameraStreamRef.current;
+      void video.play().catch(() => {
+        setCameraError('Camera preview could not start automatically.');
+      });
+      return;
+    }
+
+    video.pause();
+    video.srcObject = null;
+  }, [isCameraOpen]);
+
+  useEffect(() => {
+    return () => {
+      stopCamera(cameraStreamRef);
+      clearCaptureCountdown(captureCountdownTimeoutRef);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (captureCountdown === null) {
+      clearCaptureCountdown(captureCountdownTimeoutRef);
+      return;
+    }
+
+    captureCountdownTimeoutRef.current = window.setTimeout(() => {
+      if (captureCountdown > 1) {
+        setCaptureCountdown(captureCountdown - 1);
+        return;
+      }
+
+      setCaptureCountdown(null);
+      void captureFrameFromCamera();
+    }, 1000);
+
+    return () => {
+      clearCaptureCountdown(captureCountdownTimeoutRef);
+    };
+  }, [captureCountdown]);
 
   const aspectRatio = useMemo(() => {
     if (!image) {
@@ -161,6 +215,7 @@ function App() {
   }, [image, topText, bottomText, previewHeight, zoom, offsetX, offsetY, textScale, strokeScale]);
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    setCameraError('');
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -185,6 +240,106 @@ function App() {
     setOffsetX(0.5);
     setOffsetY(0.5);
     setDownloadName(stripExtension(file.name) || 'lolcat');
+  };
+
+  const handleStartCamera = async () => {
+    if (
+      typeof navigator === 'undefined' ||
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
+      setCameraError('This browser does not support webcam capture.');
+      return;
+    }
+
+    setIsStartingCamera(true);
+    setCameraError('');
+
+    try {
+      stopCamera(cameraStreamRef);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+        },
+        audio: false,
+      });
+
+      cameraStreamRef.current = stream;
+      setIsCameraOpen(true);
+    } catch (error) {
+      setCameraError(getCameraErrorMessage(error));
+      setIsCameraOpen(false);
+    } finally {
+      setIsStartingCamera(false);
+    }
+  };
+
+  const handleCloseCamera = () => {
+    clearCaptureCountdown(captureCountdownTimeoutRef);
+    setCaptureCountdown(null);
+    stopCamera(cameraStreamRef);
+    setIsCameraOpen(false);
+    setCameraError('');
+  };
+
+  const captureFrameFromCamera = async () => {
+    const video = videoRef.current;
+
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+      setCameraError('The camera is not ready to capture a frame yet.');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      setCameraError('The browser could not create a camera snapshot.');
+      return;
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/png');
+    });
+
+    if (!blob) {
+      setCameraError('The camera snapshot could not be created.');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(blob);
+    const nextImage = await loadImage(objectUrl);
+
+    setImage((current) => {
+      if (current) {
+        URL.revokeObjectURL(current.url);
+      }
+
+      return {
+        element: nextImage,
+        url: objectUrl,
+        width: nextImage.naturalWidth,
+        height: nextImage.naturalHeight,
+      };
+    });
+    setZoom(1);
+    setOffsetX(0.5);
+    setOffsetY(0.5);
+    setDownloadName('meem-makr-camera-shot');
+    handleCloseCamera();
+  };
+
+  const handleCaptureFromCamera = () => {
+    if (captureCountdown !== null) {
+      return;
+    }
+
+    setCameraError('');
+    setCaptureCountdown(3);
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
@@ -275,6 +430,13 @@ function App() {
           <button className="primary-button" onClick={() => fileInputRef.current?.click()}>
             Upload Image
           </button>
+          <button
+            className="secondary-button"
+            onClick={isCameraOpen ? handleCloseCamera : handleStartCamera}
+            disabled={isStartingCamera}
+          >
+            {isCameraOpen ? 'Close Camera' : isStartingCamera ? 'Starting Camera...' : 'Use Webcam'}
+          </button>
           <input
             ref={fileInputRef}
             className="sr-only"
@@ -288,21 +450,56 @@ function App() {
       <section className="workspace">
         <div className="preview-panel">
           <div className="preview-frame">
-            <canvas
-              ref={previewCanvasRef}
-              className={`preview-canvas${image ? ' is-editable' : ''}`}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              aria-label="Lolcat preview"
-            />
+            {isCameraOpen ? (
+              <div className="camera-stage">
+                <video
+                  ref={videoRef}
+                  className="camera-preview"
+                  autoPlay
+                  playsInline
+                  muted
+                />
+                {captureCountdown === null ? (
+                  <div className="camera-overlay-actions">
+                    <button
+                      className="primary-button compact-button"
+                      onClick={handleCaptureFromCamera}
+                    >
+                      Capture
+                    </button>
+                    <button
+                      className="secondary-button compact-button"
+                      onClick={handleCloseCamera}
+                    >
+                      Stop
+                    </button>
+                  </div>
+                ) : (
+                  <div className="camera-countdown" aria-live="assertive">
+                    {captureCountdown}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <canvas
+                ref={previewCanvasRef}
+                className={`preview-canvas${image ? ' is-editable' : ''}`}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                aria-label="Lolcat preview"
+              />
+            )}
           </div>
           <p className="hint">
-            {image
+            {isCameraOpen
+              ? 'Position your webcam shot, then capture it to turn it into the meme source image.'
+              : image
               ? 'Drag the image to reposition the crop. Use zoom for a tighter frame.'
               : 'Upload an image to start editing.'}
           </p>
+          {cameraError ? <p className="camera-error">{cameraError}</p> : null}
         </div>
 
         <aside className="controls-panel">
@@ -444,6 +641,36 @@ function stripExtension(filename: string) {
 
 function sanitizeFilename(value: string) {
   return value.replace(/[^a-z0-9-_]+/gi, '-').replace(/^-+|-+$/g, '');
+}
+
+function stopCamera(streamRef: { current: MediaStream | null }) {
+  streamRef.current?.getTracks().forEach((track) => track.stop());
+  streamRef.current = null;
+}
+
+function clearCaptureCountdown(timeoutRef: { current: number | null }) {
+  if (timeoutRef.current !== null) {
+    window.clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
+  }
+}
+
+function getCameraErrorMessage(error: unknown) {
+  if (error instanceof DOMException) {
+    if (error.name === 'NotAllowedError') {
+      return 'Camera access was denied. Allow webcam permission and try again.';
+    }
+
+    if (error.name === 'NotFoundError') {
+      return 'No webcam was found on this device.';
+    }
+
+    if (error.name === 'NotReadableError') {
+      return 'The webcam is already in use by another app.';
+    }
+  }
+
+  return 'The webcam could not be started.';
 }
 
 export default App;
