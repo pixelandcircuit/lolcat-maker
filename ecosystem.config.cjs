@@ -11,13 +11,14 @@ module.exports = {
 
   deploy: {
     production: {
-      user: 'deploy',
-      host: 'josh.earth',
-      ref: 'origin/main',
+      user:"deployman",
+      key: '../deployman_private.key',
+      host: "josh.earth",
+      ref: "origin/main",
       repo: 'https://github.com/pixelandcircuit/lolcat-maker.git',
-      path: '/var/www/meem-makr',
+      path: "/projects/lolcat-maker2",
       'post-deploy':
-        'npm ci && npm run build && pm2 reload ecosystem.config.cjs --env production',
+        'npm ci && npm run build',
     },
   },
 };
