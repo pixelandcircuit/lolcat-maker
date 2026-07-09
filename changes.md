@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-07-09 (GitHub link)
+
+Added a GitHub link button to the hero heading (`src/App.tsx`, `src/styles.css`). Uses the official GitHub Invertocat SVG mark, styled as a pill-shaped outlined link. Sits at the trailing end of the `.hero-heading` flex row via `margin-left: auto`, wrapping naturally on narrow screens.
+
 ## 2026-07-09 (Preloaded cat picker)
 
 Added a "Pick a Cat" button that opens a thumbnail grid of 8 bundled cat photos (`public/cats/cat-01.jpg` … `cat-08.jpg`). Clicking a thumbnail loads it as the working image and closes the picker. The button label toggles to "Hide Cats" while the grid is open.
