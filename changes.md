@@ -1,5 +1,14 @@
 # Changes
 
+## 2026-07-09 (Preloaded cat picker)
+
+Added a "Pick a Cat" button that opens a thumbnail grid of 8 bundled cat photos (`public/cats/cat-01.jpg` … `cat-08.jpg`). Clicking a thumbnail loads it as the working image and closes the picker. The button label toggles to "Hide Cats" while the grid is open.
+
+- `PRELOADED_CATS` constant in `App.tsx` maps filenames to `import.meta.env.BASE_URL`-prefixed URLs so the base path (`/meem-makr/`) is handled correctly in both dev and production.
+- `loadImageFromUrl` loads a static asset directly (no blob round-trip needed); calls `revokeObjectURL` on any previous blob-backed image as normal.
+- Cat photos downloaded from cataas.com at 800×600, two PNG responses converted to JPEG with `sips`.
+- New `.cat-picker`, `.cat-thumb-btn`, `.cat-thumb` styles in `styles.css`.
+
 ## 2026-07-09 (UI polish)
 
 - Moved the Outline weight slider into the Advanced collapsible section (`src/App.tsx`).

@@ -27,6 +27,11 @@ const DEFAULT_TOP_TEXT = 'I CAN HAZ';
 const DEFAULT_BOTTOM_TEXT = 'CHEEZBURGER?';
 const PREVIEW_WIDTH = 960;
 
+const PRELOADED_CATS = [
+  'cat-01', 'cat-02', 'cat-03', 'cat-04',
+  'cat-05', 'cat-06', 'cat-07', 'cat-08',
+].map((name) => ({ src: `${import.meta.env.BASE_URL}cats/${name}.jpg`, label: name }));
+
 function App() {
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -47,6 +52,7 @@ function App() {
   const [quality, setQuality] = useState(0.92);
   const [downloadName, setDownloadName] = useState('lolcat');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [captureCountdown, setCaptureCountdown] = useState<number | null>(null);
   const [cameraError, setCameraError] = useState('');
@@ -283,6 +289,25 @@ function App() {
       setOffsetX(0.5);
       setOffsetY(0.5);
       setDownloadName(stripExtension(file instanceof File ? file.name : fallbackName) || 'lolcat');
+    } catch {
+      setCameraError('The image could not be loaded.');
+    }
+  };
+
+  const loadImageFromUrl = async (src: string, label: string) => {
+    try {
+      const img = await loadImage(src);
+      setImage((current) => {
+        if (current) URL.revokeObjectURL(current.url);
+        return { element: img, url: src, width: img.naturalWidth, height: img.naturalHeight };
+      });
+      if (isCameraOpen) handleCloseCamera();
+      setCameraError('');
+      setZoom(1);
+      setOffsetX(0.5);
+      setOffsetY(0.5);
+      setDownloadName(label);
+      setIsPickerOpen(false);
     } catch {
       setCameraError('The image could not be loaded.');
     }
@@ -584,6 +609,12 @@ function App() {
           >
             {isCameraOpen ? 'Close Camera' : isStartingCamera ? 'Starting Camera...' : 'Use Webcam'}
           </button>
+          <button
+            className="secondary-button"
+            onClick={() => setIsPickerOpen((o) => !o)}
+          >
+            {isPickerOpen ? 'Hide Cats' : 'Pick a Cat'}
+          </button>
           <input
             ref={fileInputRef}
             className="sr-only"
@@ -594,6 +625,20 @@ function App() {
           <p className="source-hint">or paste an image with Cmd+V / Ctrl+V</p>
         </div>
       </section>
+
+      {isPickerOpen && (
+        <section className="cat-picker">
+          {PRELOADED_CATS.map((cat) => (
+            <button
+              key={cat.src}
+              className="cat-thumb-btn"
+              onClick={() => void loadImageFromUrl(cat.src, cat.label)}
+            >
+              <img src={cat.src} alt={cat.label} className="cat-thumb" loading="lazy" />
+            </button>
+          ))}
+        </section>
+      )}
 
       <section className="workspace">
         <div className="preview-panel">
