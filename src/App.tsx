@@ -695,21 +695,21 @@ function App() {
             />
           </label>
 
-          <label className="field">
-            <span>Outline weight</span>
-            <input
-              type="range"
-              min="0.6"
-              max="1.6"
-              step="0.01"
-              value={strokeScale}
-              onChange={(event) => setStrokeScale(Number(event.target.value))}
-            />
-          </label>
-
           <details className="advanced-section">
             <summary className="advanced-summary">Advanced</summary>
             <div className="advanced-fields">
+              <label className="field">
+                <span>Outline weight</span>
+                <input
+                  type="range"
+                  min="0.6"
+                  max="1.6"
+                  step="0.01"
+                  value={strokeScale}
+                  onChange={(event) => setStrokeScale(Number(event.target.value))}
+                />
+              </label>
+
               <label className="field">
                 <span>Filename</span>
                 <input
@@ -738,7 +738,7 @@ function App() {
             <button className="primary-button" onClick={() => handleDownload('png')} disabled={!image}>
               Download PNG
             </button>
-            <button className="secondary-button" onClick={() => handleDownload('jpg')} disabled={!image}>
+            <button className="primary-button" onClick={() => handleDownload('jpg')} disabled={!image}>
               Download JPG
             </button>
           </div>

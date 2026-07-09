@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-07-09 (UI polish)
+
+- Moved the Outline weight slider into the Advanced collapsible section (`src/App.tsx`).
+- Changed the Download JPG button to use `primary-button` styling to match Download PNG (`src/App.tsx`).
+
 ## 2026-07-09 (Advanced collapsible section)
 
 Moved the Filename and JPG quality controls into a collapsible "Advanced" section in the settings panel (`src/App.tsx`, `src/styles.css`).
