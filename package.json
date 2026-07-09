@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "publish-pm2": "pm2 deploy production",
     "preview": "vite preview"
   },
   "dependencies": {
