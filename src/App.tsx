@@ -2,6 +2,17 @@ import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 type ExportFormat = 'png' | 'jpg';
 
+type GestureState = {
+  activePointers: Map<number, { x: number; y: number }>;
+  startPointers: Map<number, { x: number; y: number }>;
+  startZoom: number;
+  startOffsetX: number;
+  startOffsetY: number;
+  liveZoom: number;
+  liveOffsetX: number;
+  liveOffsetY: number;
+};
+
 type ImageState = {
   element: HTMLImageElement;
   url: string;
@@ -22,12 +33,7 @@ function App() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const captureCountdownTimeoutRef = useRef<number | null>(null);
-  const dragStateRef = useRef<{
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
-  } | null>(null);
+  const gestureRef = useRef<GestureState | null>(null);
 
   const [image, setImage] = useState<ImageState | null>(null);
   const [topText, setTopText] = useState(DEFAULT_TOP_TEXT);
@@ -369,18 +375,33 @@ function App() {
       return;
     }
 
-    dragStateRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: offsetX,
-      originY: offsetY,
-    };
     event.currentTarget.setPointerCapture(event.pointerId);
+    const pos = { x: event.clientX, y: event.clientY };
+
+    if (!gestureRef.current) {
+      const activePointers = new Map([[event.pointerId, pos]]);
+      gestureRef.current = {
+        activePointers,
+        startPointers: new Map(activePointers),
+        startZoom: zoom,
+        startOffsetX: offsetX,
+        startOffsetY: offsetY,
+        liveZoom: zoom,
+        liveOffsetX: offsetX,
+        liveOffsetY: offsetY,
+      };
+    } else {
+      gestureRef.current.activePointers.set(event.pointerId, pos);
+      gestureRef.current.startPointers = new Map(gestureRef.current.activePointers);
+      gestureRef.current.startZoom = gestureRef.current.liveZoom;
+      gestureRef.current.startOffsetX = gestureRef.current.liveOffsetX;
+      gestureRef.current.startOffsetY = gestureRef.current.liveOffsetY;
+    }
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    const dragState = dragStateRef.current;
-    if (!image || !dragState) {
+    const gesture = gestureRef.current;
+    if (!image || !gesture || !gesture.activePointers.has(event.pointerId)) {
       return;
     }
 
@@ -389,35 +410,101 @@ function App() {
       return;
     }
 
+    gesture.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
     const rect = canvas.getBoundingClientRect();
-    const scale = Math.max(canvas.width / image.width, canvas.height / image.height) * zoom;
-    const sourceWidth = canvas.width / scale;
-    const sourceHeight = canvas.height / scale;
-    const maxSourceX = Math.max(0, image.width - sourceWidth);
-    const maxSourceY = Math.max(0, image.height - sourceHeight);
+    const count = gesture.activePointers.size;
 
-    const deltaX = (event.clientX - dragState.startX) / rect.width;
-    const deltaY = (event.clientY - dragState.startY) / rect.height;
+    if (count === 1) {
+      const [[, current]] = [...gesture.activePointers.entries()];
+      const [[, start]] = [...gesture.startPointers.entries()];
 
-    const nextOffsetX = clamp(
-      dragState.originX - (deltaX * sourceWidth) / Math.max(maxSourceX, 1),
-      0,
-      1,
-    );
-    const nextOffsetY = clamp(
-      dragState.originY - (deltaY * sourceHeight) / Math.max(maxSourceY, 1),
-      0,
-      1,
-    );
+      const scale = Math.max(canvas.width / image.width, canvas.height / image.height) * gesture.startZoom;
+      const sourceWidth = canvas.width / scale;
+      const sourceHeight = canvas.height / scale;
+      const maxSourceX = Math.max(0, image.width - sourceWidth);
+      const maxSourceY = Math.max(0, image.height - sourceHeight);
 
-    setOffsetX(Number.isFinite(nextOffsetX) ? nextOffsetX : 0.5);
-    setOffsetY(Number.isFinite(nextOffsetY) ? nextOffsetY : 0.5);
+      const deltaX = (current.x - start.x) / rect.width;
+      const deltaY = (current.y - start.y) / rect.height;
+
+      const nextOffsetX = clamp(
+        gesture.startOffsetX - (deltaX * sourceWidth) / Math.max(maxSourceX, 1),
+        0,
+        1,
+      );
+      const nextOffsetY = clamp(
+        gesture.startOffsetY - (deltaY * sourceHeight) / Math.max(maxSourceY, 1),
+        0,
+        1,
+      );
+
+      gesture.liveOffsetX = Number.isFinite(nextOffsetX) ? nextOffsetX : 0.5;
+      gesture.liveOffsetY = Number.isFinite(nextOffsetY) ? nextOffsetY : 0.5;
+      setOffsetX(gesture.liveOffsetX);
+      setOffsetY(gesture.liveOffsetY);
+    } else if (count >= 2) {
+      const [p1, p2] = [...gesture.activePointers.values()];
+      const [s1, s2] = [...gesture.startPointers.values()];
+
+      const currentDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      const startDist = Math.hypot(s2.x - s1.x, s2.y - s1.y);
+      const newZoom = clamp(gesture.startZoom * (currentDist / startDist), 1, 3);
+
+      const currentMidX = (p1.x + p2.x) / 2;
+      const currentMidY = (p1.y + p2.y) / 2;
+      const startMidX = (s1.x + s2.x) / 2;
+      const startMidY = (s1.y + s2.y) / 2;
+
+      const scale = Math.max(canvas.width / image.width, canvas.height / image.height) * newZoom;
+      const sourceWidth = canvas.width / scale;
+      const sourceHeight = canvas.height / scale;
+      const maxSourceX = Math.max(0, image.width - sourceWidth);
+      const maxSourceY = Math.max(0, image.height - sourceHeight);
+
+      const deltaX = (currentMidX - startMidX) / rect.width;
+      const deltaY = (currentMidY - startMidY) / rect.height;
+
+      const nextOffsetX = clamp(
+        gesture.startOffsetX - (deltaX * sourceWidth) / Math.max(maxSourceX, 1),
+        0,
+        1,
+      );
+      const nextOffsetY = clamp(
+        gesture.startOffsetY - (deltaY * sourceHeight) / Math.max(maxSourceY, 1),
+        0,
+        1,
+      );
+
+      gesture.liveZoom = newZoom;
+      gesture.liveOffsetX = Number.isFinite(nextOffsetX) ? nextOffsetX : 0.5;
+      gesture.liveOffsetY = Number.isFinite(nextOffsetY) ? nextOffsetY : 0.5;
+      setZoom(gesture.liveZoom);
+      setOffsetX(gesture.liveOffsetX);
+      setOffsetY(gesture.liveOffsetY);
+    }
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    dragStateRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    const gesture = gestureRef.current;
+    if (!gesture) {
+      return;
+    }
+
+    gesture.activePointers.delete(event.pointerId);
+
+    if (gesture.activePointers.size === 0) {
+      gestureRef.current = null;
+    } else {
+      // Reset start state so the remaining pointer continues from the current position
+      gesture.startPointers = new Map(gesture.activePointers);
+      gesture.startZoom = gesture.liveZoom;
+      gesture.startOffsetX = gesture.liveOffsetX;
+      gesture.startOffsetY = gesture.liveOffsetY;
     }
   };
 
@@ -519,7 +606,7 @@ function App() {
             {isCameraOpen
               ? 'Position your webcam shot, then capture it to turn it into the meme source image.'
               : image
-              ? 'Drag the image to reposition the crop. Use zoom for a tighter frame.'
+              ? 'Drag to reposition. Pinch to zoom on touch screens, or use the zoom slider.'
               : 'Upload, paste, or capture an image to start editing.'}
           </p>
           {cameraError ? <p className="camera-error">{cameraError}</p> : null}
