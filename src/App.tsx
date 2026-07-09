@@ -34,6 +34,7 @@ function App() {
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const captureCountdownTimeoutRef = useRef<number | null>(null);
   const gestureRef = useRef<GestureState | null>(null);
+  const wheelHandlerRef = useRef<(e: WheelEvent) => void>(() => {});
 
   const [image, setImage] = useState<ImageState | null>(null);
   const [topText, setTopText] = useState(DEFAULT_TOP_TEXT);
@@ -82,6 +83,14 @@ function App() {
       stopCamera(cameraStreamRef);
       clearCaptureCountdown(captureCountdownTimeoutRef);
     };
+  }, []);
+
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    const handler = (e: WheelEvent) => wheelHandlerRef.current(e);
+    canvas.addEventListener('wheel', handler, { passive: false });
+    return () => canvas.removeEventListener('wheel', handler);
   }, []);
 
   useEffect(() => {
@@ -370,6 +379,35 @@ function App() {
     setCaptureCountdown(3);
   };
 
+  // Updated on every render so the wheel listener always has fresh closures.
+  wheelHandlerRef.current = (event: WheelEvent) => {
+    if (!image) return;
+    event.preventDefault();
+
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+
+    if (event.ctrlKey) {
+      // Trackpad pinch — ctrlKey is set by the browser for pinch gestures
+      const factor = 1 - event.deltaY * 0.01;
+      setZoom((prev) => clamp(prev * factor, 1, 3));
+    } else {
+      // Trackpad two-finger scroll — pan the image
+      const rect = canvas.getBoundingClientRect();
+      const scale = Math.max(canvas.width / image.width, canvas.height / image.height) * zoom;
+      const sourceWidth = canvas.width / scale;
+      const sourceHeight = canvas.height / scale;
+      const maxSourceX = Math.max(0, image.width - sourceWidth);
+      const maxSourceY = Math.max(0, image.height - sourceHeight);
+
+      const fracX = event.deltaX / rect.width;
+      const fracY = event.deltaY / rect.height;
+
+      setOffsetX((prev) => clamp(prev + (fracX * sourceWidth) / Math.max(maxSourceX, 1), 0, 1));
+      setOffsetY((prev) => clamp(prev + (fracY * sourceHeight) / Math.max(maxSourceY, 1), 0, 1));
+    }
+  };
+
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (!image) {
       return;
@@ -606,7 +644,7 @@ function App() {
             {isCameraOpen
               ? 'Position your webcam shot, then capture it to turn it into the meme source image.'
               : image
-              ? 'Drag to reposition. Pinch to zoom on touch screens, or use the zoom slider.'
+              ? 'Drag or scroll to pan. Pinch to zoom on touch or trackpad, or use the zoom slider.'
               : 'Upload, paste, or capture an image to start editing.'}
           </p>
           {cameraError ? <p className="camera-error">{cameraError}</p> : null}
