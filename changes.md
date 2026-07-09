@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-07-09 (Advanced collapsible section)
+
+Moved the Filename and JPG quality controls into a collapsible "Advanced" section in the settings panel (`src/App.tsx`, `src/styles.css`).
+
+- Uses a native `<details>`/`<summary>` element — no JS needed, closed by default.
+- A small `▶` indicator rotates 90° when the section is open, animated with CSS `transition`.
+- Fields inside use a `.advanced-fields` grid wrapper to maintain the same spacing as the top-level controls.
+
 ## 2026-07-09 (trackpad gesture support)
 
 Added trackpad gesture support on the preview canvas (`src/App.tsx`):

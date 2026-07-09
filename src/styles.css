@@ -222,6 +222,44 @@ input[type='range'] {
   color: rgba(255, 255, 255, 0.82);
 }
 
+.advanced-section {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.advanced-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.93rem;
+  color: rgba(255, 255, 255, 0.6);
+  user-select: none;
+  border-radius: 14px;
+}
+
+.advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-summary::before {
+  content: '▶';
+  font-size: 0.6rem;
+  transition: transform 150ms ease;
+}
+
+details[open] .advanced-summary::before {
+  transform: rotate(90deg);
+}
+
+.advanced-fields {
+  display: grid;
+  gap: 0.95rem;
+  padding: 0 0.9rem 0.9rem;
+}
+
 .download-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

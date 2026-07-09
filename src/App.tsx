@@ -707,27 +707,32 @@ function App() {
             />
           </label>
 
-          <label className="field">
-            <span>Filename</span>
-            <input
-              type="text"
-              value={downloadName}
-              onChange={(event) => setDownloadName(sanitizeFilename(event.target.value))}
-              placeholder="lolcat"
-            />
-          </label>
+          <details className="advanced-section">
+            <summary className="advanced-summary">Advanced</summary>
+            <div className="advanced-fields">
+              <label className="field">
+                <span>Filename</span>
+                <input
+                  type="text"
+                  value={downloadName}
+                  onChange={(event) => setDownloadName(sanitizeFilename(event.target.value))}
+                  placeholder="lolcat"
+                />
+              </label>
 
-          <label className="field">
-            <span>JPG quality</span>
-            <input
-              type="range"
-              min="0.4"
-              max="1"
-              step="0.01"
-              value={quality}
-              onChange={(event) => setQuality(Number(event.target.value))}
-            />
-          </label>
+              <label className="field">
+                <span>JPG quality</span>
+                <input
+                  type="range"
+                  min="0.4"
+                  max="1"
+                  step="0.01"
+                  value={quality}
+                  onChange={(event) => setQuality(Number(event.target.value))}
+                />
+              </label>
+            </div>
+          </details>
 
           <div className="download-actions">
             <button className="primary-button" onClick={() => handleDownload('png')} disabled={!image}>
