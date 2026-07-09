@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-07-09 (lolcat translator)
+
+Added a "lolify" button next to each caption field (`src/App.tsx`, `src/styles.css`). Clicking it runs the field text through a lolcat translator and rewrites the field in lolspeak; the existing canvas renderer then uppercases it as normal.
+
+The translator lives in `src/lolTranslate.ts` — a TypeScript port of [LOLTranslate.js](https://github.com/mediaupstream/LOLTranslate.js) with the full substitution dictionary. Uses `String.prototype.replace` with a callback (cleaner than the original's two-pass approach, avoids double-replacement). Dictionary keys with special regex characters are escaped before building the pattern.
+
 ## 2026-07-09 (manual line breaks in captions)
 
 Caption text fields changed from `<input type="text">` to `<textarea rows={2}>` so users can press Enter to force explicit line breaks (`src/App.tsx`).

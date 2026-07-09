@@ -278,6 +278,26 @@ input[type='range'] {
   color: rgba(255, 255, 255, 0.82);
 }
 
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lolify-btn {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.lolify-btn:hover {
+  color: #f6b23b;
+  background: rgba(246, 178, 59, 0.12);
+}
+
 .advanced-section {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;

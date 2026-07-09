@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { lolTranslate } from './lolTranslate';
 
 type ExportFormat = 'png' | 'jpg';
 
@@ -712,7 +713,10 @@ function App() {
 
         <aside className="controls-panel">
           <label className="field">
-            <span>Top text</span>
+            <span className="field-label-row">
+              Top text
+              <button type="button" className="lolify-btn" onClick={() => setTopText((t) => lolTranslate(t))}>lolify</button>
+            </span>
             <textarea
               value={topText}
               onChange={(event) => setTopText(event.target.value)}
@@ -722,7 +726,10 @@ function App() {
           </label>
 
           <label className="field">
-            <span>Bottom text</span>
+            <span className="field-label-row">
+              Bottom text
+              <button type="button" className="lolify-btn" onClick={() => setBottomText((t) => lolTranslate(t))}>lolify</button>
+            </span>
             <textarea
               value={bottomText}
               onChange={(event) => setBottomText(event.target.value)}
