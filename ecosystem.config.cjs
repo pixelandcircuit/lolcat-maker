@@ -17,8 +17,10 @@ module.exports = {
       ref: "origin/main",
       repo: 'https://github.com/pixelandcircuit/lolcat-maker.git',
       path: "/projects/lolcat-maker2",
-      'post-deploy':
-        'npm ci && npm run build',
+      "post-deploy": [
+        "npm install",
+        "npm run build",
+      ].join(" && ")
     },
   },
 };
