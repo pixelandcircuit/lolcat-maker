@@ -223,7 +223,12 @@ function App() {
         return;
       }
 
-      const lines = wrapText(context, normalized, width - horizontalPadding * 2, baseFontSize, fontFamily);
+      const lines = normalized
+        .split('\n')
+        .flatMap((segment) => {
+          const s = segment.trim();
+          return s ? wrapText(context, s, width - horizontalPadding * 2, baseFontSize, fontFamily) : [];
+        });
       const startY = fromTop
         ? verticalPadding + baseFontSize
         : height - verticalPadding - lineHeight * (lines.length - 1);
@@ -708,21 +713,21 @@ function App() {
         <aside className="controls-panel">
           <label className="field">
             <span>Top text</span>
-            <input
-              type="text"
+            <textarea
               value={topText}
               onChange={(event) => setTopText(event.target.value)}
               placeholder="I CAN HAZ"
+              rows={2}
             />
           </label>
 
           <label className="field">
             <span>Bottom text</span>
-            <input
-              type="text"
+            <textarea
               value={bottomText}
               onChange={(event) => setBottomText(event.target.value)}
               placeholder="CHEEZBURGER?"
+              rows={2}
             />
           </label>
 

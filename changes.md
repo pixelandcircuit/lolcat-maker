@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-07-09 (manual line breaks in captions)
+
+Caption text fields changed from `<input type="text">` to `<textarea rows={2}>` so users can press Enter to force explicit line breaks (`src/App.tsx`).
+
+`drawCaptionBlock` now splits the normalized text on `\n` first, then auto-wraps each segment independently via `wrapText`. Blank segments are skipped so trailing newlines don't produce phantom lines.
+
+CSS `min-height` for `textarea` reduced from `5.5rem` to `3.5rem` to keep the fields compact by default (`src/styles.css`).
+
 ## 2026-07-09 (pm2 deployment)
 
 Added `ecosystem.config.cjs` for deploying to josh.earth via pm2. Uses `serve` (added to devDependencies) to host the built `dist/` on port 4001. Deploy target: `deploy@josh.earth:/var/www/meem-makr`. `post-deploy` runs `npm ci && npm run build && pm2 reload`. Added deployment and nginx config instructions to README.
