@@ -58,6 +58,31 @@ Preview the production build locally:
 npm run preview
 ```
 
+## Deployment (josh.earth)
+
+The app is served at `/meem-makr/` via pm2 + [serve](https://github.com/vercel/serve) on port 4001.
+
+**First deploy** (run once on the server to set up the directory):
+
+```bash
+pm2 deploy ecosystem.config.cjs production setup
+```
+
+**Deploy:**
+
+```bash
+pm2 deploy ecosystem.config.cjs production
+```
+
+**Nginx config** — nginx proxies `/meem-makr/` to the local serve process. The trailing slash on `proxy_pass` strips the prefix before forwarding, so `serve` sees plain paths rooted at `dist/`:
+
+```nginx
+location /meem-makr/ {
+    proxy_pass http://localhost:4001/;
+    proxy_set_header Host $host;
+}
+```
+
 ## Notes
 
 - The app runs entirely in the browser and does not upload images to a server.

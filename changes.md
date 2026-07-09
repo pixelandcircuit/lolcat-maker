@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-07-09 (pm2 deployment)
+
+Added `ecosystem.config.cjs` for deploying to josh.earth via pm2. Uses `serve` (added to devDependencies) to host the built `dist/` on port 4001. Deploy target: `deploy@josh.earth:/var/www/meem-makr`. `post-deploy` runs `npm ci && npm run build && pm2 reload`. Added deployment and nginx config instructions to README.
+
 ## 2026-07-09 (GitHub link)
 
 Added a GitHub link button to the hero heading (`src/App.tsx`, `src/styles.css`). Uses the official GitHub Invertocat SVG mark, styled as a pill-shaped outlined link. Sits at the trailing end of the `.hero-heading` flex row via `margin-left: auto`, wrapping naturally on narrow screens.
