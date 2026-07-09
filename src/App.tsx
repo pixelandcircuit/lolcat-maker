@@ -29,7 +29,7 @@ const PREVIEW_WIDTH = 960;
 
 const PRELOADED_CATS = [
     'lucky_sad', 'lucky_stern'
-].map((name) => ({ src: `${import.meta.env.BASE_URL}cats/${name}.jpg`, label: name }));
+].map((name) => ({ src: `cats/${name}.jpg`, label: name }));
 
 function App() {
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
