@@ -28,8 +28,7 @@ const DEFAULT_BOTTOM_TEXT = 'CHEEZBURGER?';
 const PREVIEW_WIDTH = 960;
 
 const PRELOADED_CATS = [
-  'cat-01', 'cat-02', 'cat-03', 'cat-04',
-  'cat-05', 'cat-06', 'cat-07', 'cat-08',
+    'lucky_sad', 'lucky_stern'
 ].map((name) => ({ src: `${import.meta.env.BASE_URL}cats/${name}.jpg`, label: name }));
 
 function App() {
