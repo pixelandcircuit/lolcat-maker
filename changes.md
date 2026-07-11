@@ -1,5 +1,17 @@
 # Changes
 
+## 2026-07-11 (mobile download fixes)
+
+Fixed four issues with image download on mobile (`src/App.tsx`):
+
+1. **Download link not triggering on iOS** — `link.click()` on a detached `<a>` element is silently ignored by iOS Safari. The link is now briefly appended to `document.body` before clicking and removed immediately after.
+
+2. **Cat photo missing from downloaded image** — `handleDownload` now re-loads the image from its stored URL using a fresh `HTMLImageElement` before drawing to the offscreen canvas. This ensures decoded pixel data is available, which mobile browsers can free from detached elements under memory pressure.
+
+3. **Canvas too large on mobile** — Downloads are now capped at 2048px on the longest edge (`MAX_EXPORT_PX`). Larger source images are scaled down proportionally, preventing silent canvas failures caused by mobile browser memory limits.
+
+4. **Silent export failures** — `canvas.toDataURL()` is now wrapped in a `try/catch` that surfaces an error message if the export fails (e.g. due to a tainted canvas or remaining memory issue).
+
 ## 2026-07-09 (lolcat translator)
 
 Added a "lolify" button next to each caption field (`src/App.tsx`, `src/styles.css`). Clicking it runs the field text through a lolcat translator and rewrites the field in lolspeak; the existing canvas renderer then uppercases it as normal.

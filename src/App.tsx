@@ -27,6 +27,7 @@ const clamp = (value: number, min: number, max: number) =>
 const DEFAULT_TOP_TEXT = 'I CAN HAZ';
 const DEFAULT_BOTTOM_TEXT = 'CHEEZBURGER?';
 const PREVIEW_WIDTH = 960;
+const MAX_EXPORT_PX = 2048;
 
 const PRELOADED_CATS = [
     'lucky_sad', 'lucky_stern'
@@ -165,6 +166,7 @@ function App() {
     format: ExportFormat,
     targetWidth?: number,
     targetHeight?: number,
+    imageElement?: HTMLImageElement,
   ) => {
     const context = canvas.getContext('2d');
 
@@ -200,7 +202,7 @@ function App() {
 
     context.imageSmoothingEnabled = true;
     context.drawImage(
-      image.element,
+      imageElement ?? image.element,
       sourceX,
       sourceY,
       sourceWidth,
@@ -576,21 +578,39 @@ function App() {
     }
   };
 
-  const handleDownload = (format: ExportFormat) => {
-    const canvas = document.createElement('canvas');
-    const width = image?.width ?? PREVIEW_WIDTH;
-    const height = image?.height ?? previewHeight;
+  const handleDownload = async (format: ExportFormat) => {
+    if (!image) return;
 
-    drawMeme(canvas, format, width, height);
+    const downscale = Math.min(1, MAX_EXPORT_PX / Math.max(image.width, image.height));
+    const exportWidth = Math.round(image.width * downscale);
+    const exportHeight = Math.round(image.height * downscale);
+
+    let freshElement: HTMLImageElement;
+    try {
+      freshElement = await loadImage(image.url);
+    } catch {
+      setCameraError('The image could not be reloaded for export.');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    drawMeme(canvas, format, exportWidth, exportHeight, freshElement);
 
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-    const dataUrl =
-      format === 'png' ? canvas.toDataURL(mimeType) : canvas.toDataURL(mimeType, quality);
+    let dataUrl: string;
+    try {
+      dataUrl = format === 'png' ? canvas.toDataURL(mimeType) : canvas.toDataURL(mimeType, quality);
+    } catch {
+      setCameraError('Export failed. The image may be too large for this browser.');
+      return;
+    }
 
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = `${downloadName || 'lolcat'}.${format}`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -802,10 +822,10 @@ function App() {
           </details>
 
           <div className="download-actions">
-            <button className="primary-button" onClick={() => handleDownload('png')} disabled={!image}>
+            <button className="primary-button" onClick={() => void handleDownload('png')} disabled={!image}>
               Download PNG
             </button>
-            <button className="primary-button" onClick={() => handleDownload('jpg')} disabled={!image}>
+            <button className="primary-button" onClick={() => void handleDownload('jpg')} disabled={!image}>
               Download JPG
             </button>
           </div>
