@@ -30,7 +30,8 @@ const PREVIEW_WIDTH = 960;
 const MAX_EXPORT_PX = 2048;
 
 const PRELOADED_CATS = [
-    'lucky_sad', 'lucky_stern'
+    'lucky_sad', 'lucky_stern',
+    'lucky_adorable', 'lucky_closeup',
 ].map((name) => ({ src: `cats/${name}.jpg`, label: name }));
 
 function App() {
