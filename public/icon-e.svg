@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#00897B"/>
+
+  <!-- Cat silhouette (ears behind head so head clips cleanly) -->
+  <!-- Left ear -->
+  <polygon points="112,238 184,68 252,210" fill="white"/>
+  <!-- Right ear -->
+  <polygon points="260,210 328,68 400,238" fill="white"/>
+  <!-- Head -->
+  <circle cx="256" cy="298" r="174" fill="white"/>
+
+  <!-- Eye cutouts (reveal background color) -->
+  <ellipse cx="198" cy="268" rx="30" ry="36" fill="#00897B"/>
+  <ellipse cx="314" cy="268" rx="30" ry="36" fill="#00897B"/>
+
+  <!-- Tiny nose cutout -->
+  <path d="M256 312 L244 328 L268 328 Z" fill="#00897B"/>
+</svg>

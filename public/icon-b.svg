@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#FF9800"/>
+
+  <!-- Ears (behind face) -->
+  <polygon points="108,242 180,72 252,212" fill="#F5C842"/>
+  <polygon points="260,212 332,72 404,242" fill="#F5C842"/>
+  <!-- Inner ear -->
+  <polygon points="138,228 182,108 238,212" fill="#FFB7C5"/>
+  <polygon points="274,212 330,108 374,228" fill="#FFB7C5"/>
+
+  <!-- Cat face -->
+  <circle cx="256" cy="302" r="178" fill="#F5C842"/>
+
+  <!-- Eyes -->
+  <ellipse cx="192" cy="268" rx="34" ry="40" fill="#1a1a1a"/>
+  <ellipse cx="320" cy="268" rx="34" ry="40" fill="#1a1a1a"/>
+  <!-- Eye shine -->
+  <circle cx="206" cy="252" r="14" fill="white"/>
+  <circle cx="334" cy="252" r="14" fill="white"/>
+
+  <!-- Nose -->
+  <path d="M256 312 L240 334 L272 334 Z" fill="#FF8FA3"/>
+
+  <!-- Mouth -->
+  <path d="M240 334 Q256 352 272 334" fill="none" stroke="#7a4000" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Whiskers left -->
+  <line x1="52" y1="302" x2="222" y2="316" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <line x1="52" y1="326" x2="222" y2="326" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <line x1="52" y1="350" x2="222" y2="336" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <!-- Whiskers right -->
+  <line x1="290" y1="316" x2="460" y2="302" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <line x1="290" y1="326" x2="460" y2="326" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <line x1="290" y1="336" x2="460" y2="350" stroke="#7a4000" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Speech bubble -->
+  <rect x="298" y="22" width="192" height="88" rx="20" fill="white"/>
+  <!-- Bubble tail -->
+  <polygon points="326,110 304,152 374,110" fill="white"/>
+  <!-- HAZ? text -->
+  <text x="394" y="84" text-anchor="middle" font-family="Impact, Arial Black, sans-serif" font-size="46" fill="#1a1a1a">HAZ?</text>
+</svg>
