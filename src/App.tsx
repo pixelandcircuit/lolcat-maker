@@ -619,10 +619,10 @@ function App() {
       <section className="hero-panel">
         <div className="hero-heading">
           <p className="eyebrow">meem makr</p>
-          <p className="intro">
-            Upload a photo, crop and scale it into place, add top and bottom captions,
-            then export a finished meme as PNG or JPG.
-          </p>
+          {/*<p className="intro">*/}
+          {/*  Upload a photo, crop and scale it into place, add top and bottom captions,*/}
+          {/*  then export a finished meme as PNG or JPG.*/}
+          {/*</p>*/}
           <a
             className="github-link"
             href="https://github.com/pixelandcircuit/lolcat-maker"
@@ -823,11 +823,11 @@ function App() {
           </details>
 
           <div className="download-actions">
-            <button className="primary-button" onClick={() => void handleDownload('png')} disabled={!image}>
-              Download PNG
-            </button>
+            {/*<button className="primary-button" onClick={() => void handleDownload('png')} disabled={!image}>*/}
+            {/*  Download PNG*/}
+            {/*</button>*/}
             <button className="primary-button" onClick={() => void handleDownload('jpg')} disabled={!image}>
-              Download JPG
+              Download
             </button>
           </div>
         </aside>

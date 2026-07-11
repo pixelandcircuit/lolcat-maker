@@ -357,6 +357,9 @@ details[open] .advanced-summary::before {
 .primary-button {
   background: #f6b23b;
   color: #18120a;
+  &:active {
+    background: #fbe2b4;
+  }
 }
 
 .secondary-button {
@@ -392,17 +395,11 @@ details[open] .advanced-summary::before {
   border: 0;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 640px) {
   .workspace {
     grid-template-columns: 1fr;
   }
 
-  .hero-panel h1 {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
   .app-shell {
     width: min(100vw - 1rem, 100%);
     padding-top: 1rem;
@@ -410,6 +407,7 @@ details[open] .advanced-summary::before {
 
   .hero-panel h1 {
     font-size: clamp(2.2rem, 12vw, 3.4rem);
+    max-width: 100%;
   }
 
   .download-actions {
