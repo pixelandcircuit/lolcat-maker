@@ -1,5 +1,15 @@
 # Changes
 
+## 2026-07-15 15:00 (build number + timestamp)
+
+Added a build number and build timestamp display below the GitHub link in the hero panel:
+
+- `vite.config.ts` — injects `__BUILD_NUMBER__` (git commit count via `git rev-list --count HEAD`) and `__BUILD_TIME__` (ISO timestamp at build time) using Vite's `define`
+- `src/vite-env.d.ts` — new file declaring the ambient `__BUILD_NUMBER__` / `__BUILD_TIME__` globals
+- `src/App.tsx` — wrapped the GitHub link in a new `.github-block` column container with a `<p className="build-info">` showing `Build #<n> · <local timestamp with timezone>` underneath
+- `src/styles.css` — added `.github-block` (column flex, moved `margin-left: auto` here) and `.build-info` (small, muted text) styles
+- `@types/node` added as a devDependency so `vite.config.ts` can type-check `node:child_process`
+
 ## 2026-07-11 (app icon + PWA manifest)
 
 Added a proper home screen / browser tab icon (option B: amber background, golden cat face, pink inner ears, white "HAZ?" speech bubble):

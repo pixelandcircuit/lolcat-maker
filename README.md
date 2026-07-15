@@ -58,6 +58,8 @@ Preview the production build locally:
 npm run preview
 ```
 
+Each build embeds a build number (the git commit count at build time) and a build timestamp, shown below the GitHub link in the app header. These are computed in `vite.config.ts` via `git rev-list --count HEAD` and baked in as compile-time constants, so they require a git checkout to be present at build time.
+
 ## Deployment (josh.earth)
 
 The app is served at `/meem-makr/` via pm2 + [serve](https://github.com/vercel/serve) on port 4001.

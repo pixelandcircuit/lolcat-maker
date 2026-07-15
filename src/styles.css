@@ -93,8 +93,15 @@ input[type='range'] {
   font-size: 1.05rem;
 }
 
-.github-link {
+.github-block {
   margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.github-link {
   display: flex;
   align-items: center;
   gap: 0.45rem;
@@ -112,6 +119,13 @@ input[type='range'] {
 .github-link:hover {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
+}
+
+.build-info {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.72rem;
+  white-space: nowrap;
 }
 
 .hero-actions {
