@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-08-08 (add GitHub Actions CI)
+
+- `.github/workflows/ci.yml` — runs on push/PR to main: installs deps, builds with `tsc + vite`, then runs `npm audit --audit-level=moderate`
+
 ## 2026-08-08 (fix download on mobile Chrome)
 
 - `src/App.tsx` — convert canvas data URL to Blob before triggering download; Chrome on Android ignores the `download` attribute on `data:` URLs, but respects it on `blob:` URLs. Also use the Web Share API (with file) on capable mobile browsers, which gives a native save/share sheet on both Chrome and Safari for Android/iOS.
