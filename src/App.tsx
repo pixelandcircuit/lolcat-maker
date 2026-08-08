@@ -607,12 +607,31 @@ function App() {
       return;
     }
 
+    const filename = `${downloadName || 'lolcat'}.${format}`;
+
+    // Convert data URL to Blob — required for Chrome on Android, which ignores
+    // the `download` attribute on data: URLs entirely.
+    const [header, base64] = dataUrl.split(',');
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: mimeType });
+
+    // Use Web Share API on mobile when available — gives a native save/share sheet.
+    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: mimeType })] })) {
+      const file = new File([blob], filename, { type: mimeType });
+      navigator.share({ files: [file], title: filename }).catch(() => {/* user cancelled */});
+      return;
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = `${downloadName || 'lolcat'}.${format}`;
+    link.href = blobUrl;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
   };
 
   return (

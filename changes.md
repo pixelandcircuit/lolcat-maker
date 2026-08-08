@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-08-08 (fix download on mobile Chrome)
+
+- `src/App.tsx` — convert canvas data URL to Blob before triggering download; Chrome on Android ignores the `download` attribute on `data:` URLs, but respects it on `blob:` URLs. Also use the Web Share API (with file) on capable mobile browsers, which gives a native save/share sheet on both Chrome and Safari for Android/iOS.
+
 ## 2026-07-15 15:00 (build number + timestamp)
 
 Added a build number and build timestamp display below the GitHub link in the hero panel:
