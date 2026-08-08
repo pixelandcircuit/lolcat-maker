@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-08-08 (update vite to 8.0.16)
+
+- `package.json` / `package-lock.json` — vite 5.4.10 → 8.0.16 (security fix), @vitejs/plugin-react 4.7.0 → 6.0.5 (required for Vite 8 peer dep)
+
 ## 2026-08-08 (add GitHub Actions CI)
 
 - `.github/workflows/ci.yml` — runs on push/PR to main: installs deps, builds with `tsc + vite`, then runs `npm audit --audit-level=moderate`

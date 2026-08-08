@@ -611,7 +611,7 @@ function App() {
 
     // Convert data URL to Blob — required for Chrome on Android, which ignores
     // the `download` attribute on data: URLs entirely.
-    const [header, base64] = dataUrl.split(',');
+    const [ base64] = dataUrl.split(',');
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
