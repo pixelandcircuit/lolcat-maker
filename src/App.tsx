@@ -29,11 +29,29 @@ const DEFAULT_BOTTOM_TEXT = 'CHEEZBURGER?';
 const PREVIEW_WIDTH = 960;
 const MAX_EXPORT_PX = 2048;
 
-const PRELOADED_CATS = [
-    'lucky_sad', 'lucky_stern',
-    'lucky_adorable', 'lucky_closeup',
-    'lucky_frootloops', 'lucky_n_gin'
-].map((name) => ({ src: `cats/${name}.jpg`, label: name }));
+const toCats = (names: string[]) =>
+  names.map((name) => ({ src: `cats/${name}.jpg`, label: name }));
+
+const CAT_SETS = {
+  lucky: {
+    title: 'Lucky',
+    cats: toCats([
+      'lucky_sad', 'lucky_stern',
+      'lucky_adorable', 'lucky_closeup',
+      'lucky_frootloops', 'lucky_n_gin'
+    ])
+  },
+  sprigi: {
+    title: 'Sprigi',
+    cats: toCats([
+      'sprigi_guitar', 'sprigi_sink_above',
+      'sprigi_sink_front', 'sprigi_snow',
+      'sprigi_yell', 'sprigy_stretch'
+    ])
+  }
+};
+
+type CatSetKey = keyof typeof CAT_SETS;
 
 function App() {
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -55,7 +73,7 @@ function App() {
   const [quality, setQuality] = useState(0.92);
   const [downloadName, setDownloadName] = useState('lolcat');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [isPickerOpen, setIsPickerOpen] = useState(true);
+  const [openPicker, setOpenPicker] = useState<CatSetKey | null>('lucky');
   const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [captureCountdown, setCaptureCountdown] = useState<number | null>(null);
   const [cameraError, setCameraError] = useState('');
@@ -316,7 +334,7 @@ function App() {
       setOffsetX(0.5);
       setOffsetY(0.5);
       setDownloadName(label);
-      setIsPickerOpen(false);
+      setOpenPicker(null);
     } catch {
       setCameraError('The image could not be loaded.');
     }
@@ -662,12 +680,15 @@ function App() {
           </div>
         </div>
         <div className="hero-actions">
-          <button
-            className="secondary-button"
-            onClick={() => setIsPickerOpen((o) => !o)}
-          >
-            {isPickerOpen ? 'Hide Cats' : 'Pick a Cat'}
-          </button>
+          {(Object.keys(CAT_SETS) as CatSetKey[]).map((key) => (
+            <button
+              key={key}
+              className="secondary-button"
+              onClick={() => setOpenPicker((o) => (o === key ? null : key))}
+            >
+              {openPicker === key ? `Hide ${CAT_SETS[key].title}` : `Pick ${CAT_SETS[key].title}`}
+            </button>
+          ))}
           <button className="primary-button" onClick={() => fileInputRef.current?.click()}>
             Upload Image
           </button>
@@ -689,9 +710,9 @@ function App() {
         </div>
       </section>
 
-      {isPickerOpen && (
+      {openPicker && (
         <section className="cat-picker">
-          {PRELOADED_CATS.map((cat) => (
+          {CAT_SETS[openPicker].cats.map((cat) => (
             <button
               key={cat.src}
               className="cat-thumb-btn"

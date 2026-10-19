@@ -1,5 +1,9 @@
 # Changes
 
+## 2026-10-19 12:00 (Pick Sprigi)
+
+- `src/App.tsx` — replaced single `PRELOADED_CATS` list/`isPickerOpen` with `CAT_SETS` (lucky, sprigi) and `openPicker` state; buttons are now "Pick Lucky" (was "Pick a Cat") and new "Pick Sprigi", each toggling its own thumbnail grid.
+
 ## 2026-08-08 (update vite to 8.0.16)
 
 - `package.json` / `package-lock.json` — vite 5.4.10 → 8.0.16 (security fix), @vitejs/plugin-react 4.7.0 → 6.0.5 (required for Vite 8 peer dep)
