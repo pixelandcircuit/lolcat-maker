@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-10-22 12:28 (pin Node.js to patched releases)
+
+- `.nvmrc` — new, pins Node 26.12.1 (October 2026 Node.js security release).
+- `package.json` — added `engines.node` `^22.23.4 || ^24.22.1 || >=26.12.1` (the patched baselines per branch; CI uses 22).
+
 ## 2026-10-19 12:00 (Pick Sprigi)
 
 - `src/App.tsx` — replaced single `PRELOADED_CATS` list/`isPickerOpen` with `CAT_SETS` (lucky, sprigi) and `openPicker` state; buttons are now "Pick Lucky" (was "Pick a Cat") and new "Pick Sprigi", each toggling its own thumbnail grid.
