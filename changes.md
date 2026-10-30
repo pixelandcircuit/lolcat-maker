@@ -119,3 +119,7 @@ Added multi-touch gesture support on the preview canvas (`src/App.tsx`):
 Replaced the single-pointer `dragStateRef` with a `GestureState` ref that tracks `activePointers` (current positions) and `startPointers` (snapshot at gesture start), plus `start*` / `live*` copies of zoom and offsets. `touch-action: none` was already present in CSS on the editable canvas, so no style changes were needed.
 
 Updated the preview hint text to mention pinch-to-zoom.
+
+## 2026-10-30 12:00
+
+Source buttons (Pick Lucky, Pick Sprigy, Upload Image, Use Webcam) now act as tabs: the active one is drawn in orange (`is-selected`). Added `isUploadActive` state in `src/App.tsx`; Upload Image is now a secondary button that turns orange when clicked and is cleared when another source is chosen.

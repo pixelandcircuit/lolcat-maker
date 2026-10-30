@@ -381,6 +381,11 @@ details[open] .advanced-summary::before {
   color: #ffffff;
 }
 
+.secondary-button.is-selected {
+  background: #f6b23b;
+  color: #18120a;
+}
+
 .compact-button {
   padding: 0.7rem 1rem;
 }

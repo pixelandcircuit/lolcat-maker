@@ -41,6 +41,7 @@ http://127.0.0.1:5173/
 ## Using the App
 
 - Upload an image from your device, paste one from the clipboard, or open the webcam and capture a frame after the countdown.
+- The source buttons (Pick Lucky, Pick Sprigy, Upload Image, Use Webcam) act as tabs; the active one is highlighted in orange.
 - Drag the image preview to reposition the crop and use the zoom slider for framing.
 - Enter top and bottom caption text, then export the result as PNG or JPG.
 

@@ -42,7 +42,7 @@ const CAT_SETS = {
     ])
   },
   sprigi: {
-    title: 'Sprigi',
+    title: 'Sprigy',
     cats: toCats([
       'sprigi_guitar', 'sprigi_sink_above',
       'sprigi_sink_front', 'sprigi_snow',
@@ -74,6 +74,7 @@ function App() {
   const [downloadName, setDownloadName] = useState('lolcat');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [openPicker, setOpenPicker] = useState<CatSetKey | null>('lucky');
+  const [isUploadActive, setIsUploadActive] = useState(false);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [captureCountdown, setCaptureCountdown] = useState<number | null>(null);
   const [cameraError, setCameraError] = useState('');
@@ -335,6 +336,7 @@ function App() {
       setOffsetY(0.5);
       setDownloadName(label);
       setOpenPicker(null);
+      setIsUploadActive(false);
     } catch {
       setCameraError('The image could not be loaded.');
     }
@@ -361,6 +363,7 @@ function App() {
     }
 
     setIsStartingCamera(true);
+    setIsUploadActive(false);
     setCameraError('');
 
     try {
@@ -683,17 +686,27 @@ function App() {
           {(Object.keys(CAT_SETS) as CatSetKey[]).map((key) => (
             <button
               key={key}
-              className="secondary-button"
-              onClick={() => setOpenPicker((o) => (o === key ? null : key))}
+              className={`secondary-button${openPicker === key ? ' is-selected' : ''}`}
+              onClick={() => {
+                setIsUploadActive(false);
+                setOpenPicker((o) => (o === key ? null : key));
+              }}
             >
               {openPicker === key ? `Hide ${CAT_SETS[key].title}` : `Pick ${CAT_SETS[key].title}`}
             </button>
           ))}
-          <button className="primary-button" onClick={() => fileInputRef.current?.click()}>
+          <button
+            className={`secondary-button${isUploadActive ? ' is-selected' : ''}`}
+            onClick={() => {
+              setOpenPicker(null);
+              setIsUploadActive(true);
+              fileInputRef.current?.click();
+            }}
+          >
             Upload Image
           </button>
           <button
-            className="secondary-button"
+            className={`secondary-button${isCameraOpen ? ' is-selected' : ''}`}
             onClick={isCameraOpen ? handleCloseCamera : handleStartCamera}
             disabled={isStartingCamera}
           >
