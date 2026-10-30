@@ -30,7 +30,11 @@ const PREVIEW_WIDTH = 960;
 const MAX_EXPORT_PX = 2048;
 
 const toCats = (names: string[]) =>
-  names.map((name) => ({ src: `cats/${name}.jpg`, label: name }));
+  names.map((name) => ({
+    src: `cats/${name}.jpg`,
+    thumb: `cats/thumbs/${name}.jpg`,
+    label: name,
+  }));
 
 const CAT_SETS = {
   lucky: {
@@ -731,7 +735,7 @@ function App() {
               className="cat-thumb-btn"
               onClick={() => void loadImageFromUrl(cat.src, cat.label)}
             >
-              <img src={cat.src} alt={cat.label} className="cat-thumb" loading="lazy" />
+              <img src={cat.thumb} alt={cat.label} className="cat-thumb" loading="lazy" />
             </button>
           ))}
         </section>

@@ -123,3 +123,7 @@ Updated the preview hint text to mention pinch-to-zoom.
 ## 2026-10-30 12:00
 
 Source buttons (Pick Lucky, Pick Sprigy, Upload Image, Use Webcam) now act as tabs: the active one is drawn in orange (`is-selected`). Added `isUploadActive` state in `src/App.tsx`; Upload Image is now a secondary button that turns orange when clicked and is cleared when another source is chosen.
+
+## 2026-10-30 12:30
+
+Fixed slow tab switching: the cat pickers were loading the full-size 2-6 MB originals as thumbnails. Added 320px thumbnails in `public/cats/thumbs/` (used by the picker grid in `src/App.tsx`) and downsized the originals in `public/cats/` to max 2048px (matching `MAX_EXPORT_PX`). `public/cats` went from ~37 MB to ~10 MB. The originals remain in git history.
