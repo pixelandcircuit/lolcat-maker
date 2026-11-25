@@ -61,9 +61,9 @@ npm run preview
 
 Each build embeds a build number (the git commit count at build time) and a build timestamp, shown below the GitHub link in the app header. These are computed in `vite.config.ts` via `git rev-list --count HEAD` and baked in as compile-time constants, so they require a git checkout to be present at build time.
 
-## Deployment (josh.earth)
+## Deployment (apps.josh.earth)
 
-The app is served at `/meem-makr/` via pm2 + [serve](https://github.com/vercel/serve) on port 4001.
+The app is live at <https://apps.josh.earth/meem-makr/>, served via pm2 + [serve](https://github.com/vercel/serve) on port 4001. pm2 deploys over SSH to the `josh.earth` host set in `ecosystem.config.cjs`.
 
 **First deploy** (run once on the server to set up the directory):
 
@@ -79,7 +79,7 @@ pm2 deploy ecosystem.config.cjs production
 
 The `post-deploy` step runs `npm install`, `npm run build`, then `pm2 startOrReload ecosystem.config.cjs`, so the serve process is restarted on every deploy and picks up dependency upgrades.
 
-**Nginx config** — nginx proxies `/meem-makr/` to the local serve process. The trailing slash on `proxy_pass` strips the prefix before forwarding, so `serve` sees plain paths rooted at `dist/`:
+**Nginx config** — in the `server {}` block for `apps.josh.earth` (not the root `josh.earth` site), nginx proxies `/meem-makr/` to the local serve process. The trailing slash on `proxy_pass` strips the prefix before forwarding, so `serve` sees plain paths rooted at `dist/`:
 
 ```nginx
 location /meem-makr/ {
