@@ -5,6 +5,14 @@
 - `package.json` / `package-lock.json` — serve 14.2.6 → 14.2.8, which pulls in compression 1.8.2 (fixes GHSA-vc2v-76pw-4v95, a high-severity DoS via memory leak). serve is the production static server under pm2, not just a dev tool. 14.2.8 also replaces `clipboardy` with `tinyclip`, which drops ~20 transitive packages (unused here: we run with `--no-clipboard`). This was making the CI `npm audit` step fail on `main`.
 - `ecosystem.config.cjs` — `post-deploy` now ends with `pm2 startOrReload ecosystem.config.cjs`. Before, it only ran `npm install && npm run build`, so new static files went live but the running serve process (and any upgrade to it) wasn't restarted.
 
+## 2026-11-25 (separate Download and Share buttons)
+
+- `src/App.tsx` — the single "Download" button used to open the native share sheet on any browser that could share files (including desktop Safari and Chrome/Edge), and never downloaded there. It's now two buttons:
+  - **Download** always saves the file (blob URL + `<a download>`).
+  - **Share** opens the native share sheet, and is only rendered when `navigator.canShare({ files })` is true (checked once at module load as `canShareFiles`).
+- Export rendering moved into `renderExportFile()`, which returns a `File` that both handlers use.
+- Share errors are no longer all swallowed: `AbortError` (user closed the sheet) is ignored, and any other failure shows "Sharing failed. Try Download instead."
+
 ## 2026-10-22 12:28 (pin Node.js to patched releases)
 
 - `.nvmrc` — new, pins Node 26.12.1 (October 2026 Node.js security release).
