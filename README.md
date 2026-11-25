@@ -77,6 +77,8 @@ pm2 deploy ecosystem.config.cjs production setup
 pm2 deploy ecosystem.config.cjs production
 ```
 
+The `post-deploy` step runs `npm install`, `npm run build`, then `pm2 startOrReload ecosystem.config.cjs`, so the serve process is restarted on every deploy and picks up dependency upgrades.
+
 **Nginx config** — nginx proxies `/meem-makr/` to the local serve process. The trailing slash on `proxy_pass` strips the prefix before forwarding, so `serve` sees plain paths rooted at `dist/`:
 
 ```nginx
