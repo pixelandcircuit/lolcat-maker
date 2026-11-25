@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-11-25 (fix serve audit failure, reload pm2 on deploy)
+
+- `package.json` / `package-lock.json` — serve 14.2.6 → 14.2.8, which pulls in compression 1.8.2 (fixes GHSA-vc2v-76pw-4v95, a high-severity DoS via memory leak). serve is the production static server under pm2, not just a dev tool. 14.2.8 also replaces `clipboardy` with `tinyclip`, which drops ~20 transitive packages (unused here: we run with `--no-clipboard`). This was making the CI `npm audit` step fail on `main`.
+- `ecosystem.config.cjs` — `post-deploy` now ends with `pm2 startOrReload ecosystem.config.cjs`. Before, it only ran `npm install && npm run build`, so new static files went live but the running serve process (and any upgrade to it) wasn't restarted.
+
 ## 2026-10-22 12:28 (pin Node.js to patched releases)
 
 - `.nvmrc` — new, pins Node 26.12.1 (October 2026 Node.js security release).

@@ -20,6 +20,9 @@ module.exports = {
       "post-deploy": [
         "npm install",
         "npm run build",
+        // Restart serve so dependency upgrades (e.g. serve itself) take effect;
+        // startOrReload also starts it on the first deploy.
+        "pm2 startOrReload ecosystem.config.cjs",
       ].join(" && ")
     },
   },
