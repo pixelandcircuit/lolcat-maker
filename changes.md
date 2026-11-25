@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-11-25 (separate Download and Share buttons)
+
+- `src/App.tsx` — the single "Download" button used to open the native share sheet on any browser that could share files (including desktop Safari and Chrome/Edge), and never downloaded there. It's now two buttons:
+  - **Download** always saves the file (blob URL + `<a download>`).
+  - **Share** opens the native share sheet, and is only rendered when `navigator.canShare({ files })` is true (checked once at module load as `canShareFiles`).
+- Export rendering moved into `renderExportFile()`, which returns a `File` that both handlers use.
+- Share errors are no longer all swallowed: `AbortError` (user closed the sheet) is ignored, and any other failure shows "Sharing failed. Try Download instead."
+
 ## 2026-10-22 12:28 (pin Node.js to patched releases)
 
 - `.nvmrc` — new, pins Node 26.12.1 (October 2026 Node.js security release).

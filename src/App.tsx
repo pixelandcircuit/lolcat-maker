@@ -29,6 +29,13 @@ const DEFAULT_BOTTOM_TEXT = 'CHEEZBURGER?';
 const PREVIEW_WIDTH = 960;
 const MAX_EXPORT_PX = 2048;
 
+// Whether the browser can open a native share sheet with an image file attached.
+// Checked once at load: support doesn't change while the page is open.
+const canShareFiles =
+  typeof navigator !== 'undefined' &&
+  typeof navigator.canShare === 'function' &&
+  navigator.canShare({ files: [new File([], 'probe.jpg', { type: 'image/jpeg' })] });
+
 const toCats = (names: string[]) =>
   names.map((name) => ({
     src: `cats/${name}.jpg`,
@@ -605,8 +612,9 @@ function App() {
     }
   };
 
-  const handleDownload = async (format: ExportFormat) => {
-    if (!image) return;
+  // Renders the meme to an image file, or returns null (after showing an error) if it can't.
+  const renderExportFile = async (format: ExportFormat): Promise<File | null> => {
+    if (!image) return null;
 
     const downscale = Math.min(1, MAX_EXPORT_PX / Math.max(image.width, image.height));
     const exportWidth = Math.round(image.width * downscale);
@@ -617,7 +625,7 @@ function App() {
       freshElement = await loadImage(image.url);
     } catch {
       setCameraError('The image could not be reloaded for export.');
-      return;
+      return null;
     }
 
     const canvas = document.createElement('canvas');
@@ -629,34 +637,45 @@ function App() {
       dataUrl = format === 'png' ? canvas.toDataURL(mimeType) : canvas.toDataURL(mimeType, quality);
     } catch {
       setCameraError('Export failed. The image may be too large for this browser.');
-      return;
+      return null;
     }
 
     const filename = `${downloadName || 'lolcat'}.${format}`;
 
-    // Convert data URL to Blob — required for Chrome on Android, which ignores
-    // the `download` attribute on data: URLs entirely.
+    // Convert data URL to bytes — Chrome on Android ignores the `download`
+    // attribute on data: URLs, but respects it on blob: URLs.
     const [, base64] = dataUrl.split(',');
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type: mimeType });
+    return new File([bytes], filename, { type: mimeType });
+  };
 
-    // Use Web Share API on mobile when available — gives a native save/share sheet.
-    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: mimeType })] })) {
-      const file = new File([blob], filename, { type: mimeType });
-      navigator.share({ files: [file], title: filename }).catch(() => {/* user cancelled */});
-      return;
-    }
+  const handleDownload = async (format: ExportFormat) => {
+    const file = await renderExportFile(format);
+    if (!file) return;
 
-    const blobUrl = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(file);
     const link = document.createElement('a');
     link.href = blobUrl;
-    link.download = filename;
+    link.download = file.name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(blobUrl);
+  };
+
+  const handleShare = async (format: ExportFormat) => {
+    const file = await renderExportFile(format);
+    if (!file) return;
+
+    try {
+      await navigator.share({ files: [file], title: file.name });
+    } catch (error) {
+      // AbortError means the user closed the share sheet — not a failure.
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      setCameraError('Sharing failed. Try Download instead.');
+    }
   };
 
   return (
@@ -893,6 +912,11 @@ function App() {
             <button className="primary-button" onClick={() => void handleDownload('jpg')} disabled={!image}>
               Download
             </button>
+            {canShareFiles ? (
+              <button className="secondary-button" onClick={() => void handleShare('jpg')} disabled={!image}>
+                Share
+              </button>
+            ) : null}
           </div>
         </aside>
       </section>
